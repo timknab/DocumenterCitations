@@ -2,13 +2,13 @@
 abstract type Citations <: Builder.DocumentPipeline end
 
 Selectors.order(::Type{Citations}) = 3.1  # After cross-references
-
 function Selectors.runner(::Type{Citations}, doc::Documents.Document)
     @info "Citations: building citations."
     expand_citations(doc)
 end
 
 function expand_citations(doc::Documents.Document)
+    # i = 1
     for (src, page) in doc.blueprint.pages
         empty!(page.globals.meta)
         for element in page.elements
@@ -18,12 +18,15 @@ function expand_citations(doc::Documents.Document)
 end
 
 function expand_citation(elem, page, doc)
+
     Documents.walk(page.globals.meta, elem) do link
-        expand_citation(link, page.globals.meta, page, doc)
+            expand_citation(link, page.globals.meta, page, doc)
+
     end
 end
 
 function expand_citation(link::Markdown.Link, meta, page, doc)
+    # global i
     link.url !== "@cite" && return false
 
     if length(link.text) === 1 && isa(link.text[1], String)
@@ -39,7 +42,13 @@ function expand_citation(link::Markdown.Link, meta, page, doc)
                     anchor   = Anchors.anchor(headers, entry.id)
                     path     = relpath(anchor.file, dirname(page.build))
                     link.text = xnames(entry) * " (" * xyear(entry) * ")"
+                    global tracker
+                    # println(tracker)
+                    indexer2 = tracker[entry.id]
+                    link.text = string(indexer2)
+                    # link.text = 
                     link.url = string(path, Anchors.fragment(anchor))
+                    # global indexer = indexer + 1
                     return true
                 else
                     push!(doc.internal.errors, :citations)

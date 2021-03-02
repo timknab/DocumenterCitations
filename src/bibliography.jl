@@ -39,6 +39,7 @@ end
 function Selectors.runner(::Type{BibliographyBlock}, x, page, doc)
     @info "Expanding bibliography."
     raw_bib = "<dl>"
+    idnum = 1
     for (id, entry) in doc.plugins[CitationBibliography].bib
         @info "Expanding bibliography entry: $id."
 
@@ -50,12 +51,16 @@ function Selectors.runner(::Type{BibliographyBlock}, x, page, doc)
         link = xlink(entry)
         title = xtitle(entry) |> tex2unicode
         published_in = xin(entry)
-
-        entry_text = """<dt>$id</dt>
+        # global tracker
+        # println(tracker)
+        # idnum = tracker[entry.id]
+        global tracker[entry.id] = idnum
+        entry_text = """
         <dd>
-          <div id="$id">$authors ($year), <a href="$link">$title</a>, $published_in</a>
+          <div id="$id">$idnum . $authors ($year), <a href="$link">$title</a>, $published_in</a>
         </dd>"""
         raw_bib *= entry_text
+    idnum = idnum + 1
     end
     raw_bib *= "\n</dl>"
 

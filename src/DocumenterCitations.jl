@@ -1,5 +1,6 @@
 module DocumenterCitations
-
+global indexer = 1
+global tracker = Dict()
 using Documenter
 using Documenter.Anchors
 using Documenter.Builder
@@ -17,7 +18,11 @@ export CitationBibliography
 struct CitationBibliography <: Documenter.Plugin
     bib::Dict
 end
+
+
+
 function CitationBibliography(filename::AbstractString="")
+    # global indexer = 1
     filename == "" && return CitationBibliography(Dict())
     bf = import_bibtex(filename)
     return CitationBibliography(bf)
